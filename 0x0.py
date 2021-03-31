@@ -41,6 +41,6 @@ class ZeroXzerOMod(loader.Module):
 			await message.edit(OxO.text)
 			return
 		url = OxO.text
-		output = f"{choice(list('⚀⚁⚂⚃⚄⚅'))}<code>{url}</code>"
+		output = <code>{url}</code>"
 		await message.edit(output)
 	
