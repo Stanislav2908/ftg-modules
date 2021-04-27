@@ -1,21 +1,31 @@
+import html
+from telethon import events
+from telethon.tl.types import ChannelParticipantsAdmins
+from telethon.tl.functions.users import GetFullUserRequest
 from .. import loader, utils
-from telethon import functions
 
-@loader.tds
-class ReportMod(loader.Module):
-    """Репорт"""
-    strings = {"name": "Report"}
 
-    async def reportcmd(self, message):
-        """Репорт пользователя за спам."""
-        args = utils.get_args_raw(message)
-        reply = await message.get_reply_message()
-        if args:
-            user = await message.client.get_entity(args if not args.isnumeric() else int(args))
-        if reply:
-            user = await message.client.get_entity(reply.sender_id)
+def mention_html(user_id, name):
+        return u'<a href="tg://user?id={}">{}</a>'.format(user_id, html.escape(name))
+
+class reportadminsMod(loader.Module):
+
+    strings = {"name":"Reporting"}
+
+    async def reportcmd(self, event):
+        """reporting users"""
+        if event.is_reply:
+            reply_message = await event.get_reply_message()
+            reply_user = await event.client(GetFullUserRequest(reply_message.sender_id))
+            user = [i async for i in event.client.iter_participants(event.to_id.channel_id, filter=ChannelParticipantsAdmins)]
+            admin = []
+            for u in user:
+                admin.append(mention_html(u.id, "\u200b"))
+            text = f"<b><a href='tg://user?id={reply_message.sender_id}'>{reply_user.user.first_name}</a> Доложено админам.</b>"
+            text += "".join(admin)
+            await event.client.send_message(event.chat_id, text, reply_to=reply_message.id)
+            await event.delete()
         else:
-            return await message.edit("<b>Кого я должен зарепортить?</b>")
-
-        await message.client(functions.messages.ReportSpamRequest(peer=user.id))
-        await message.edit("<b>Ты получил репорт за спам!</b>")
+            await event.edit("<b>Реплай забыл.</b>")
+    
+            
