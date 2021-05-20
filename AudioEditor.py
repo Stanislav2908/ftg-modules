@@ -163,17 +163,7 @@ class AudioEditorMod(loader.Module):
         audio = await get_audio(self, m, "Converter")
         if not audio: return
         await go_out(audio.message, audio, audio.audio, audio.pref, f"Converted to {f[0].lower()}", fmt=f[0].lower())
-    
-    async def byrobertscmd(self, m):
-        '''.byroberts <reply to audio>
-            Add at the end "Directed by Robert B Weide"'''
-        audio = await get_audio(self, m, "Directed by...")
-        if not audio: return
-        out = audio.audio + AudioSegment.from_file(io.BytesIO(requests.get(
-            "https://raw.githubusercontent.com/D4n13l3k00/files-for-modules/master/directed.mp3").content)).apply_gain(
-            +8)
-        await go_out(audio.message, audio, out, audio.pref, audio.pref)
-
+        
     async def cutscmd(self, m):
         """.cuts <start(ms):end(ms)> <reply to audio>
         Cut audio"""
